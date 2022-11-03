@@ -1,12 +1,10 @@
 from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QWidget, QApplication, QPushButton, QLabel
 from PyQt5 import uic
-from itertools import pairwise
 
 class BoardView(QWidget):
     def __init__(self, parent):
         super().__init__()
-
         # load ui file
         self.ui = uic.loadUi("ui/BoardView.ui", self)
 
