@@ -1,4 +1,4 @@
-from PyQt5.QtCore import QTimer
+from PyQt5.QtCore import QTimer, pyqtSlot
 from PyQt5.QtWidgets import QWidget, QApplication, QPushButton, QLabel
 from PyQt5 import uic
 
@@ -22,6 +22,10 @@ class BoardView(QWidget):
             self.button8.objectName: (1, 2),
             self.button9.objectName: (2, 2),
         }
+        self.buttons = [
+            self.button1, self.button2, self.button3, self.button4, self.button5,
+            self.button6, self.button7, self.button8, self.button9
+        ]
 
         # blink frequencies
         self.blink_frequencies = {
@@ -40,7 +44,8 @@ class BoardView(QWidget):
         self.is_player_turn = True
 
         # flag to enable flashing
-        self.flash = True
+        self.is_flashing = False
+        self.is_flashed_on = [True] * 9
 
         self.button1_flash_timer = QTimer(self, interval=self.blink_frequencies["frequency1"])
         self.button2_flash_timer = QTimer(self, interval=self.blink_frequencies["frequency2"])
@@ -52,6 +57,15 @@ class BoardView(QWidget):
         self.button8_flash_timer = QTimer(self, interval=self.blink_frequencies["frequency8"])
         self.button9_flash_timer = QTimer(self, interval=self.blink_frequencies["frequency9"])
 
+        self.button1_flash_timer.timeout.connect(lambda: self.flashing(0))
+        self.button2_flash_timer.timeout.connect(lambda: self.flashing(1))
+        self.button3_flash_timer.timeout.connect(lambda: self.flashing(2))
+        self.button4_flash_timer.timeout.connect(lambda: self.flashing(3))
+        self.button5_flash_timer.timeout.connect(lambda: self.flashing(4))
+        self.button6_flash_timer.timeout.connect(lambda: self.flashing(5))
+        self.button7_flash_timer.timeout.connect(lambda: self.flashing(6))
+        self.button8_flash_timer.timeout.connect(lambda: self.flashing(7))
+        self.button9_flash_timer.timeout.connect(lambda: self.flashing(8))
         # utility collections
         self.flash_timers = [
             self.button1_flash_timer,
@@ -64,15 +78,14 @@ class BoardView(QWidget):
             self.button8_flash_timer,
             self.button9_flash_timer,
         ]
-        self.buttons = [
-            self.button1, self.button2, self.button3, self.button4, self.button5,
-            self.button6, self.button7, self.button8, self.button9
-        ]
+
 
         self.blink_frequencies_to_buttons = {
             frequency: button for frequency, button in zip(self.blink_frequencies.values(), self.buttons)
         }
         self.clicked_buttons = []
+
+        self.PlacePieceBtn.clicked.connect(self.place_piece_btn_pressed)
 
     def check_win(self):
         # Across
@@ -138,17 +151,38 @@ class BoardView(QWidget):
 
     def initialize_flash_timers(self):
         # only make the buttons that have not been clicked to flash
-
         for timer in self.flash_timers:
             timer.timeout.connect(self.flashing)
         for timer in self.flash_timers:
             timer.start()
 
-    def flashing(self):
-        if self.flash:
-            self.setStyleSheet('background-color: none;')
+    @pyqtSlot(int)
+    def flashing(self, i):
+        if self.is_flashed_on[i]:
+            self.buttons[i].setStyleSheet('background-color: none;')
         else:
-            self.setStyleSheet('background-color: medium orchid;')
+            self.buttons[i].setStyleSheet('background-color: orange;')
 
-        self.flash = not self.flash
+        self.is_flashed_on[i] = not self.is_flashed_on[i]
 
+    def to_computer_board_view(self):
+        # is_player_turn = False
+        # flashing should be disabled
+        # for all buttons that have been clicked, set text to either O or X
+        pass
+    def to_player_board_view(self):
+        # is_player_turn = True
+        # flashing should be enabled, but only for the buttons that have not yet been clicked
+        # clicked grids should be grayed out
+        # for the buttons that are flashing, no text should be set
+        pass
+
+    def place_piece_btn_pressed(self):
+        if self.is_flashing:
+            [timer.stop() for timer in self.flash_timers]
+            print('Flash stopped')
+        else:
+            [timer.start() for timer in self.flash_timers]
+            print('Flash started')
+
+        self.is_flashing = not self.is_flashing
