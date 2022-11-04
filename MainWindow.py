@@ -2,9 +2,10 @@ from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QMainWindow, QApplication, QPushButton, QLabel
 from PyQt5 import uic
 
-from ui import ComputerTurnPrompt
-
 from ui.BoardView import BoardView
+from ui.PlayerTurnPrompt import  PlayerTurnPrompt
+from ui.ComputerTurnPrompt import ComputerTurnPrompt
+
 import sys
 
 class MainWindow(QMainWindow):
@@ -13,15 +14,22 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle('Rena Tic Tac Toe')
         self.app = app
+        self.ui = uic.loadUi("MainWindow.ui", self)
 
         # display timer
         self.display_timer = QTimer()
 
         # load presentation screens
         self.player_boardview = BoardView(self)
-        # self.computer_boardview = ComputerBoardView(self)
-        # self.player_turn_prompt = PlayerTurnPrompt(self)
-        # self.computer_turn_prompt = ComputerTurnPrompt(self)
+        self.player_turn_prompt = PlayerTurnPrompt(self)
+        self.computer_turn_prompt = ComputerTurnPrompt(self)
+
+        # connect start button to an appropriate callback function
+        self.startButton.clicked.connect(self.start_button_pressed)
+
+    def start_button_pressed(self):
+        # timer that runs for certain amount of time
+        pass
 
     def switch_views(self):
         pass

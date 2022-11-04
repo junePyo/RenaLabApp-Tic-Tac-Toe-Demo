@@ -36,10 +36,6 @@ class BoardView(QWidget):
             "frequency9": 25
         }
 
-        self.blink_frequencies_to_buttons = {
-            frequency: button for frequency, button in zip(self.blink_frequencies.values(), self.buttons)
-        }
-
         # flag to denote whose turn it is
         self.is_player_turn = True
 
@@ -72,6 +68,10 @@ class BoardView(QWidget):
             self.button1, self.button2, self.button3, self.button4, self.button5,
             self.button6, self.button7, self.button8, self.button9
         ]
+
+        self.blink_frequencies_to_buttons = {
+            frequency: button for frequency, button in zip(self.blink_frequencies.values(), self.buttons)
+        }
 
     def check_win(self):
         # Across
