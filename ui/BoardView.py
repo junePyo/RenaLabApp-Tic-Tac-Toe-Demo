@@ -72,6 +72,7 @@ class BoardView(QWidget):
         self.blink_frequencies_to_buttons = {
             frequency: button for frequency, button in zip(self.blink_frequencies.values(), self.buttons)
         }
+        self.clicked_buttons = []
 
     def check_win(self):
         # Across
@@ -126,8 +127,9 @@ class BoardView(QWidget):
         clicked_button = self.blink_frequencies_to_buttons[most_likely_frequency]
         # clicked = (row, column)
         # clicked_button = self.button_positions(clicked)
-        clicked_button.setText("X")
-        clicked_button.setEnabled = False
+        # clicked_button.setText("X")
+        self.clicked_buttons.append(clicked_button)
+        # clicked_button.setEnabled = False
         self.check_win()
 
     def identify_closest_button_to_classification_result(self, observed_frequency):
@@ -135,6 +137,8 @@ class BoardView(QWidget):
         return most_likely_frequency
 
     def initialize_flash_timers(self):
+        # only make the buttons that have not been clicked to flash
+
         for timer in self.flash_timers:
             timer.timeout.connect(self.flashing)
         for timer in self.flash_timers:

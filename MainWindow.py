@@ -29,7 +29,7 @@ class MainWindow(QMainWindow):
 
     def start_button_pressed(self):
         # timer that runs for certain amount of time
-        pass
+        self.player_boardview.show()
 
     def switch_views(self):
         pass
