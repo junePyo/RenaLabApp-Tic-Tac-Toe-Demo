@@ -33,3 +33,12 @@ class MainWindow(QMainWindow):
 
     def switch_views(self):
         pass
+
+    def finish_game(self, winner):
+        if winner == 'computer':
+            self.computer_turn_prompt.textEdit.setPlainText("Game Over! Computer Wins!")
+        else:
+            self.computer_turn_prompt.textEdit.setPlainText("Game Over! Player Wins!!")
+
+        self.computer_turn_prompt.show()
+        self.player_boardview.hide()

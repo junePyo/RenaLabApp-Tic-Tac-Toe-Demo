@@ -150,7 +150,10 @@ class BoardView(QWidget):
             self.win(self.button3, self.button5, self.button7)
 
     def win(self, a, b, c):
-        self.label.setText("Game Over!")
+        if a.text == COMPUTER_MARK:
+            self.parent.finish_game('computer')
+        else:
+            self.parent.finish_game('player')
 
     def process_clicked(self, observed_frequency):
         """ To be called from MainWindow when response is received from RenaLabApp """
@@ -200,11 +203,12 @@ class BoardView(QWidget):
 
         # computer makes a move
         chosen_button = self.unclicked_buttons[0]
+        chosen_button.setText(COMPUTER_MARK)
         chosen_button.setEnabled(False)
         # clicked = (row, column)
         # clicked_button = self.button_positions(clicked)
         # clicked_button.setText("X")
-        self.computer_clicked_buttons(chosen_button)
+        self.computer_clicked_buttons.append(chosen_button)
         self.unclicked_buttons.remove(chosen_button)
         self.unclicked_buttons_timers.remove(self.button_to_flash_timers[chosen_button])
         # clicked_button.setEnabled = False
