@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>794</width>
-    <height>863</height>
+    <width>824</width>
+    <height>889</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -312,7 +312,8 @@
          </size>
         </property>
         <property name="text">
-         <string>Ready to Place Your Piece</string>
+         <string>Press when you are ready to make your next move. 
+ The board will start flashing in 2 seconds!</string>
         </property>
         <property name="iconSize">
          <size>

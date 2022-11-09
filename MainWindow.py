@@ -34,6 +34,16 @@ class MainWindow(QMainWindow):
     def switch_views(self):
         pass
 
+    def on_player_board_view_complete(self):
+        self.player_boardview.stop_flashing()
+        self.computer_turn_prompt.show()
+        QTimer.singleShot(2000, self.on_computer_turn_prompt_complete)
+
+    def on_computer_turn_prompt_complete(self):
+        self.player_boardview.to_computer_board_view()
+        print("huh?")
+        self.player_boardview.show()
+
     def send_lsl(self):
         # sending the event markers
         # send number 1 when the flash starts
