@@ -98,7 +98,7 @@ class BoardView(QWidget):
             button: timer for button, timer in zip(self.buttons, self.flash_timers)
         }
 
-        # self.unclicked_buttons = self.buttons.copy()
+        self.unclicked_buttons = self.buttons.copy()
         self.unclicked_buttons_timers = self.flash_timers.copy()
         self.player_clicked_buttons = []
         self.computer_clicked_buttons = []
@@ -152,7 +152,7 @@ class BoardView(QWidget):
     def win(self, a, b, c):
         self.label.setText("Game Over!")
 
-    def clicked(self, observed_frequency):
+    def process_clicked(self, observed_frequency):
         """ To be called from MainWindow when response is received from RenaLabApp """
         most_likely_frequency = self.identify_closest_button_to_classification_result(observed_frequency)
         clicked_button = self.blink_frequencies_to_buttons[most_likely_frequency]
@@ -161,6 +161,7 @@ class BoardView(QWidget):
         # clicked_button = self.button_positions(clicked)
         # clicked_button.setText("X")
         self.player_clicked_buttons.append(clicked_button)
+        self.unclicked_buttons.remove(clicked_button)
         self.unclicked_buttons_timers.remove(self.button_to_flash_timers[clicked_button])
         # clicked_button.setEnabled = False
         self.check_win()
@@ -197,6 +198,21 @@ class BoardView(QWidget):
 
         # flashing should be disabled
 
+        # computer makes a move
+        chosen_button = self.unclicked_buttons[0]
+        chosen_button.setEnabled(False)
+        # clicked = (row, column)
+        # clicked_button = self.button_positions(clicked)
+        # clicked_button.setText("X")
+        self.computer_clicked_buttons(chosen_button)
+        self.unclicked_buttons.remove(chosen_button)
+        self.unclicked_buttons_timers.remove(self.button_to_flash_timers[chosen_button])
+        # clicked_button.setEnabled = False
+        self.check_win()
+
+        self.PlacePieceBtn.setText(
+            'Press when you are ready to make your next move.\nThe board will start flashing in 2 seconds!')
+
     def to_player_board_view(self):
         self.is_player_turn = True
         # hide marks for the clicked grids
@@ -209,12 +225,27 @@ class BoardView(QWidget):
         # turn on flashing
         # flashing should be enabled, but only for the buttons that have not yet been clicked
         self.start_flashing()
+        self.send_lsl(flash=True)
 
         # hand back the flow control back to the main window
         # timeout connect main window callback function
-        QTimer.singleShot(4000, self.parent.on_player_board_view_complete)
+        QTimer.singleShot(4000, self.complete_player_board_view)
 
-        # send LSL signal to RenaLabApp
+    def complete_player_board_view(self):
+        self.stop_flashing()
+        # send LSL termination signal to RenaLabApp
+        self.send_lsl(flash=False)
+        # clean up flashing stylesheets
+        [button.setStyleSheet('background-color: none;') for button in self.buttons]
+
+        # receive response back from RenaLabApp
+        response = self.receive_lsl()
+        if response:
+            self.process_clicked(response)
+
+        # self.computer_turn_prompt.show()
+        self.PlacePieceBtn.setText('Computer is making its next move...\n You will see the updated board soon.')
+        QTimer.singleShot(2000, self.to_computer_board_view)
 
     def place_piece_btn_pressed(self):
         self.transition_timer.start()
@@ -237,3 +268,22 @@ class BoardView(QWidget):
             print('Flash started')
 
         self.is_flashing = not self.is_flashing
+
+    def send_lsl(self, flash=True):
+        # sending the event markers
+        # send number 1 when the flash starts
+        # send number 2 when the flash ends
+        # if flash_started:
+        #     # send 1
+        # else:
+        #     # send 2
+        pass
+
+    def receive_lsl(self):
+        # receive classification result
+        # listen for certain amount of time after sending number 2 event marker
+        # inlet.poll_sample
+        # after receivng anything, make sure to clear the buffer -- poll_sample function will automatically clear the buffeer
+        # poll, if there is no data, wait 3 more seconds (use the timeout parameter in the poll_sample function)
+        # handle exception if something is wrong with the classifier
+        pass

@@ -33,28 +33,3 @@ class MainWindow(QMainWindow):
 
     def switch_views(self):
         pass
-
-    def on_player_board_view_complete(self):
-        self.player_boardview.stop_flashing()
-        self.computer_turn_prompt.show()
-        QTimer.singleShot(2000, self.on_computer_turn_prompt_complete)
-
-    def on_computer_turn_prompt_complete(self):
-        self.player_boardview.to_computer_board_view()
-        print("huh?")
-        self.player_boardview.show()
-
-    def send_lsl(self):
-        # sending the event markers
-        # send number 1 when the flash starts
-        # send number 2 when the flash ends
-        pass
-
-    def receive_lsl(self):
-        # receive classification result
-        # listen for certain amount of time after sending number 2 event marker
-        # inlet.poll_sample
-        # after receivng anything, make sure to clear the buffer -- poll_sample function will automatically clear the buffeer
-        # poll, if there is no data, wait 3 more seconds (use the timeout parameter in the poll_sample function)
-        # handle exception if something is wrong with the classifier
-        pass
