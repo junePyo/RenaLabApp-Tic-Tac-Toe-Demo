@@ -41,4 +41,4 @@ class MainWindow(QMainWindow):
             self.computer_turn_prompt.textEdit.setPlainText("Game Over! Player Wins!!")
 
         self.computer_turn_prompt.show()
-        self.player_boardview.hide()
+        # self.player_boardview.hide()

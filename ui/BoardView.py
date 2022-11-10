@@ -150,7 +150,7 @@ class BoardView(QWidget):
             self.win(self.button3, self.button5, self.button7)
 
     def win(self, a, b, c):
-        if a.text == COMPUTER_MARK:
+        if a.text() == COMPUTER_MARK:
             self.parent.finish_game('computer')
         else:
             self.parent.finish_game('player')
