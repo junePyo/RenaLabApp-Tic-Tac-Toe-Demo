@@ -1,6 +1,7 @@
 from PyQt5.QtCore import QTimer, pyqtSlot
 from PyQt5.QtWidgets import QWidget, QApplication, QPushButton, QLabel
 from PyQt5 import uic
+from pylsl import StreamInfo, IRREGULAR_RATE, StreamOutlet
 
 PLAYER_MARK = 'O'
 COMPUTER_MARK = 'X'
@@ -10,9 +11,13 @@ class BoardView(QWidget):
         super().__init__()
         # load ui file
         self.ui = uic.loadUi("ui/BoardView.ui", self)
-
         self.parent = parent
 
+        # init LSL fields
+        info = StreamInfo('TicTacToeEvents', 'Events', 1, IRREGULAR_RATE, 'float32', 'someuuid1234')
+        self.outlet = StreamOutlet(info)
+
+        # UI elements
         self.transition_timer = QTimer()
         self.transition_timer.setInterval(2000)
         self.transition_timer.setSingleShot(True)
@@ -104,6 +109,7 @@ class BoardView(QWidget):
         self.computer_clicked_buttons = []
 
         self.PlacePieceBtn.clicked.connect(self.place_piece_btn_pressed)
+
 
     def check_win(self):
         # Across
@@ -277,11 +283,10 @@ class BoardView(QWidget):
         # sending the event markers
         # send number 1 when the flash starts
         # send number 2 when the flash ends
-        # if flash_started:
-        #     # send 1
-        # else:
-        #     # send 2
-        pass
+        if flash:
+            self.outlet.push_sample([1])
+        else:
+            self.outlet.push_sample([2])
 
     def receive_lsl(self):
         # receive classification result
