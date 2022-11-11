@@ -1,7 +1,8 @@
+import numpy as np
 from PyQt5.QtCore import QTimer, pyqtSlot
 from PyQt5.QtWidgets import QWidget, QApplication, QPushButton, QLabel
 from PyQt5 import uic
-from pylsl import StreamInfo, IRREGULAR_RATE, StreamOutlet
+from pylsl import StreamInfo, IRREGULAR_RATE, StreamOutlet, resolve_stream, StreamInlet
 
 PLAYER_MARK = 'O'
 COMPUTER_MARK = 'X'
@@ -16,6 +17,12 @@ class BoardView(QWidget):
         # init LSL fields
         info = StreamInfo('TicTacToeEvents', 'Events', 1, IRREGULAR_RATE, 'float32', 'someuuid1234')
         self.outlet = StreamOutlet(info)
+
+        print('Connecting to DecodedFreqIndex...')
+        streams = resolve_stream('name', 'DecodedFreqIndex')
+        self.inlet = StreamInlet(streams[0])
+        print('Connected to DecodedFreqIndex')
+
 
         # UI elements
         self.transition_timer = QTimer()
@@ -42,7 +49,7 @@ class BoardView(QWidget):
         ]
 
         # blink frequencies
-        self.blink_frequencies = {
+        self.blink_frequency_dict = {
             "frequency1": 4,
             "frequency2": 6.6,
             "frequency3": 7.5,
@@ -53,6 +60,17 @@ class BoardView(QWidget):
             "frequency8": 20,
             "frequency9": 25
         }
+        self.blink_frequencies = np.array([
+            4,
+            6.6,
+            7.5,
+            8.57,
+            10,
+            12,
+            15,
+            20,
+            25
+        ])
 
         # flag to denote whose turn it is
         self.is_player_turn = True
@@ -61,15 +79,15 @@ class BoardView(QWidget):
         self.is_flashing = False
         self.is_flashed_on = [True] * 9
 
-        self.button1_flash_timer = QTimer(self, interval=self.blink_frequencies["frequency1"])
-        self.button2_flash_timer = QTimer(self, interval=self.blink_frequencies["frequency2"])
-        self.button3_flash_timer = QTimer(self, interval=self.blink_frequencies["frequency3"])
-        self.button4_flash_timer = QTimer(self, interval=self.blink_frequencies["frequency4"])
-        self.button5_flash_timer = QTimer(self, interval=self.blink_frequencies["frequency5"])
-        self.button6_flash_timer = QTimer(self, interval=self.blink_frequencies["frequency6"])
-        self.button7_flash_timer = QTimer(self, interval=self.blink_frequencies["frequency7"])
-        self.button8_flash_timer = QTimer(self, interval=self.blink_frequencies["frequency8"])
-        self.button9_flash_timer = QTimer(self, interval=self.blink_frequencies["frequency9"])
+        self.button1_flash_timer = QTimer(self, interval=self.blink_frequency_dict["frequency1"])
+        self.button2_flash_timer = QTimer(self, interval=self.blink_frequency_dict["frequency2"])
+        self.button3_flash_timer = QTimer(self, interval=self.blink_frequency_dict["frequency3"])
+        self.button4_flash_timer = QTimer(self, interval=self.blink_frequency_dict["frequency4"])
+        self.button5_flash_timer = QTimer(self, interval=self.blink_frequency_dict["frequency5"])
+        self.button6_flash_timer = QTimer(self, interval=self.blink_frequency_dict["frequency6"])
+        self.button7_flash_timer = QTimer(self, interval=self.blink_frequency_dict["frequency7"])
+        self.button8_flash_timer = QTimer(self, interval=self.blink_frequency_dict["frequency8"])
+        self.button9_flash_timer = QTimer(self, interval=self.blink_frequency_dict["frequency9"])
 
         self.button1_flash_timer.timeout.connect(lambda: self.flashing(0))
         self.button2_flash_timer.timeout.connect(lambda: self.flashing(1))
@@ -96,7 +114,7 @@ class BoardView(QWidget):
 
         self.blink_frequencies_to_buttons = {
             # order matters! button1 should be matched with the first frequency, and so on.
-            frequency: button for frequency, button in zip(self.blink_frequencies.values(), self.buttons)
+            frequency: button for frequency, button in zip(self.blink_frequency_dict.values(), self.buttons)
         }
         self.button_to_flash_timers = {
             # order matters! button1 should be matched with button1_flash_timer, and so on.
@@ -176,7 +194,7 @@ class BoardView(QWidget):
         self.check_win()
 
     def identify_closest_button_to_classification_result(self, observed_frequency):
-        most_likely_frequency = min(self.blink_frequencies.values(), key=lambda x: abs(x - observed_frequency))
+        most_likely_frequency = min(self.blink_frequency_dict.values(), key=lambda x: abs(x - observed_frequency))
         return most_likely_frequency
 
     def initialize_flash_timers(self):
@@ -295,4 +313,6 @@ class BoardView(QWidget):
         # after receivng anything, make sure to clear the buffer -- poll_sample function will automatically clear the buffeer
         # poll, if there is no data, wait 3 more seconds (use the timeout parameter in the poll_sample function)
         # handle exception if something is wrong with the classifier
-        pass
+        sample, timestamp = self.inlet.pull_sample(timeout=2)
+        i = int(sample[0])
+        print('Received: frequency {} Hz at index {} has the highest power.'.format(self.blink_frequencies[i], i))
