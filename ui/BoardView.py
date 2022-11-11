@@ -316,3 +316,4 @@ class BoardView(QWidget):
         sample, timestamp = self.inlet.pull_sample(timeout=2)
         i = int(sample[0])
         print('Received: frequency {} Hz at index {} has the highest power.'.format(self.blink_frequencies[i], i))
+        return self.blink_frequencies[i]
